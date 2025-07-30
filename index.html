@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Cerdas Cermat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    #container {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    #question {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #timer {
+      font-size: 18px;
+      color: #d9534f;
+      margin-top: 10px;
+    }
+    #result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #score {
+      font-size: 18px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🧠 Cerdas Cermat</h1>
+<div id="container">
+  <div id="question">Klik mulai untuk memulai kuis!</div>
+  <input type="text" id="answer" placeholder="Ketik jawaban..." disabled>
+  <br>
+  <button onclick="submitAnswer()" id="submitBtn" disabled>Kirim Jawaban</button>
+  <div id="timer"></div>
+  <div id="result"></div>
+  <div id="score"></div>
+  <button onclick="startGame()">Mulai</button>
+</div>
+
+<!-- Suara -->
+<audio id="sound-correct" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_8c278dcbd9.mp3?filename=correct-2-46134.mp3" preload="auto"></audio>
+<audio id="sound-wrong" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_efdbf118e5.mp3?filename=wrong-answer-2-30350.mp3" preload="auto"></audio>
+<audio id="sound-timeup" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_857876d13b.mp3?filename=beep-6-96243.mp3" preload="auto"></audio>
+<audio id="sound-question" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5f76c7a7d0.mp3?filename=notification-1-126505.mp3" preload="auto"></audio>
+
+<script>
+const questions = [
+  { question: "Ibu kota Indonesia?", answer: "jakarta" },
+  { question: "2 + 5 = ?", answer: "7" },
+  { question: "Warna bendera Indonesia bagian bawah?", answer: "putih" },
+  { question: "Hewan berkaki 8?", answer: "laba-laba" },
+  { question: "Planet ketiga dari Matahari?", answer: "bumi" }
+];
+
+let current = 0;
+let score = 0;
+let timer;
+let timeLeft = 30;
+
+const soundCorrect = document.getElementById("sound-correct");
+const soundWrong = document.getElementById("sound-wrong");
+const soundTimeUp = document.getElementById("sound-timeup");
+const soundQuestion = document.getElementById("sound-question");
+
+function startGame() {
+  current = 0;
+  score = 0;
+  document.getElementById('score').textContent = '';
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (current >= questions.length) {
+    document.getElementById('question').textContent = "🎉 Selesai! Skor akhir kamu: " + score + "/" + questions.length;
+    document.getElementById('answer').disabled = true;
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('timer').textContent = "";
+    return;
+  }
+
+  document.getElementById('answer').value = "";
+  document.getElementById('answer').disabled = false;
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('result').textContent = "";
+  document.getElementById('question').textContent = questions[current].question;
+  soundQuestion.play();
+  startTimer();
+}
+
+function startTimer() {
+  timeLeft = 30;
+  document.getElementById('timer').textContent = `⏳ Waktu: ${timeLeft}s`;
+  clearInterval(timer);
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = `⏳ Waktu: ${timeLeft}s`;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      soundTimeUp.play();
+      checkAnswer("");
+    }
+  }, 1000);
+}
+
+function submitAnswer() {
+  const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+  checkAnswer(userAnswer);
+}
+
+function checkAnswer(ans) {
+  clearInterval(timer);
+  document.getElementById('answer').disabled = true;
+  document.getElementById('submitBtn').disabled = true;
+
+  const correct = questions[current].answer.toLowerCase();
+  if (ans === correct) {
+    document.getElementById('result').textContent = "✅ Benar!";
+    score++;
+    soundCorrect.play();
+  } else {
+    document.getElementById('result').textContent = `❌ Salah! Jawaban: ${correct}`;
+    if (ans !== "") soundWrong.play();
+  }
+
+  document.getElementById('score').textContent = `Skor: ${score}/${questions.length}`;
+  setTimeout(() => {
+    current++;
+    nextQuestion();
+  }, 2000);
+}
+</script>
+
+</body>
+</html>
